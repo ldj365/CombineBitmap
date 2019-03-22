@@ -81,18 +81,18 @@ public class BitmapLoader {
             }
         };
 
-        if (collectUndoTasks(getOriginalUrl(index, builder.getUrls()[index], builder.getDefaultBitmapAndKeyProvider()), task)) {
+        if (collectUndoTasks(getOriginalUrl(builder.getCount(),index, builder.getUrls()[index], builder.getDefaultBitmapAndKeyProvider()), task)) {
             return;
         }
 
         ThreadPool.getInstance().execute(task);
     }
 
-    private String getOriginalUrl(int index, String url, DefaultBitmapAndKeyProvider provider) {
+    private String getOriginalUrl(int count,int index, String url, DefaultBitmapAndKeyProvider provider) {
         String key;
         if (TextUtils.isEmpty(url)) {
             if (provider != null) {
-                key = provider.getKey(index);
+                key = provider.getKey(count,index);
             } else {
                 key = "";
             }
@@ -103,7 +103,7 @@ public class BitmapLoader {
     }
 
     private Bitmap loadBitmap(int count, int index, String url, int reqWidth, int reqHeight, DefaultBitmapAndKeyProvider defaultBitmapAndKeyProvider) {
-        url = getOriginalUrl(index, url, defaultBitmapAndKeyProvider);
+        url = getOriginalUrl(count,index, url, defaultBitmapAndKeyProvider);
         String key = Utils.hashKeyFormUrl(url);
 
         // 尝试从内存缓存中读取
@@ -144,7 +144,7 @@ public class BitmapLoader {
         if (provider == null) {
             return null;
         }
-        String url = getOriginalUrl(index, "", provider);
+        String url = getOriginalUrl(count,index, "", provider);
         String key = Utils.hashKeyFormUrl(url);
         Bitmap bitmap = provider.provide(count, index);
         if (bitmap == null) {

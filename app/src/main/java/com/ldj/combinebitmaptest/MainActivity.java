@@ -167,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                     }
 
                     @Override
-                    public String getKey(int index) {
+                    public String getKey(int count,int index) {
                         return "测";
                     }
                 })
@@ -205,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                     }
 
                     @Override
-                    public String getKey(int index) {
+                    public String getKey(int count,int index) {
                         return "测";
                     }
                 })
