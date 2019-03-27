@@ -3,21 +3,20 @@ package com.ldj.combinebitmaptest;
 import android.Manifest;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.PixelFormat;
-import android.graphics.drawable.Drawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.ldj.combinebitmap.CombineBitmap;
+import com.ldj.combinebitmap.bean.ImageData;
 import com.ldj.combinebitmap.layout.DingLayoutManager;
 import com.ldj.combinebitmap.layout.WechatLayoutManager;
-import com.ldj.combinebitmap.provider.DefaultBitmapAndKeyProvider;
+import com.ldj.combinebitmap.listener.OnProgressListener;
 import com.ldj.combinebitmap.listener.OnSubItemClickListener;
-import com.shehuan.niv.NiceImageView;
+import com.ldj.combinebitmap.text.DingTextBitmapConfigManager;
+import com.ldj.combinebitmap.text.WechatTextBitmapConfigManager;
 
 import java.util.List;
 
@@ -39,9 +38,11 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             "http://img.hb.aicdn.com/73f2fbeb01cd3fcb2b4dccbbb7973aa1a82c420b21079-5yj6fx_fw658",
     };
 
-    NiceImageView imageView1;
-    NiceImageView imageView2;
-    NiceImageView imageView3;
+    ImageView imageView1;
+    ImageView imageView2;
+    ImageView imageView3;
+    ImageView imageView44;
+
     ImageView imageView4;
     ImageView imageView5;
     ImageView imageView6;
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     ImageView imageView9;
     ImageView imageView10;
     ImageView imageView11;
+    ImageView imageView12;
 
 
     private int[] getResourceIds(int count) {
@@ -64,6 +66,15 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         String[] urls = new String[count];
         System.arraycopy(IMG_URL_ARR, 0, urls, 0, count);
         return urls;
+    }
+
+    private ImageData[] getImageData(int count){
+        ImageData[] imageDatas=new ImageData[count];
+        for (int i = 0; i < count; i++) {
+            imageDatas[i]=new ImageData(IMG_URL_ARR[i],"图"+i,R.drawable.cat);
+        }
+        imageDatas[count-1]=new ImageData(R.drawable.cat);
+        return imageDatas;
     }
 
     private Bitmap[] getBitmaps(int count) {
@@ -82,6 +93,9 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         imageView1 = findViewById(R.id.nice_iv1);
         imageView2 = findViewById(R.id.nice_iv2);
         imageView3 = findViewById(R.id.nice_iv3);
+        imageView44 = findViewById(R.id.nice_iv4);
+
+
         imageView4 = findViewById(R.id.iv4);
         imageView5 = findViewById(R.id.iv5);
         imageView6 = findViewById(R.id.iv6);
@@ -90,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         imageView9 = findViewById(R.id.iv9);
         imageView10 = findViewById(R.id.iv10);
         imageView11 = findViewById(R.id.iv11);
+        imageView12 = findViewById(R.id.iv12);
         requestStoragePermission();
     }
 
@@ -97,26 +112,19 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private void requestStoragePermission() {
         String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
         if (EasyPermissions.hasPermissions(this, perms)) {
-            loadDingBitmap(imageView1, 2);
+            loadDingBitmap(imageView1, 1);
+            loadDingBitmap(imageView2, 2);
+            loadDingBitmap(imageView3, 3);
+            loadDingBitmap(imageView44, 4);
 
-            loadDingBitmap(imageView2, 3);
-
-            loadDingBitmap(imageView3, 4);
-
-            loadWechatBitmap(imageView4, 2);
-
-            loadWechatBitmap(imageView5, 3);
-
-            loadWechatBitmap(imageView6, 4);
-
-            loadWechatBitmap(imageView7, 5);
-
-            loadWechatBitmap(imageView8, 6);
-
-            loadWechatBitmap(imageView9, 7);
-
-            loadWechatBitmap(imageView10, 8);
-
+            loadWechatBitmap(imageView4, 1);
+            loadWechatBitmap(imageView5, 2);
+            loadWechatBitmap(imageView6, 3);
+            loadWechatBitmap(imageView7, 4);
+            loadWechatBitmap(imageView8, 5);
+            loadWechatBitmap(imageView9, 6);
+            loadWechatBitmap(imageView10, 7);
+            loadWechatBitmap(imageView11, 8);
             loadWechatBitmap(imageView11, 9);
 
         } else {
@@ -150,9 +158,11 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private void loadWechatBitmap(ImageView imageView, int count) {
         CombineBitmap.get(imageView)
                 .setLayoutManager(new WechatLayoutManager())
+                .setTextConfigManager(new WechatTextBitmapConfigManager())
                 .setSize(180)
                 .setGap(3)
                 .setGapColor(Color.parseColor("#E8E8E8"))
+                .setImageDatas(getImageData(count))
                 .setUrls(getUrls(count))
                 .setOnSubItemClickListener(new OnSubItemClickListener() {
                     @Override
@@ -160,55 +170,29 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                         Log.e("SubItemIndex", "--->" + index);
                     }
                 })
-                .setDefaultBitmapAndKeyProvider(new DefaultBitmapAndKeyProvider() {
+                .setOnProgressListener(new OnProgressListener() {
                     @Override
-                    public Bitmap provide(int count, int index) {
-                        return  drawableToBitmap(AvatarHelper.getInstance().makeDefaultDrawable("测",false));
+                    public void onStart() {
+
                     }
 
                     @Override
-                    public String getKey(int count,int index) {
-                        return "测";
+                    public void onComplete(Bitmap bitmap) {
+
                     }
                 })
                 .load();
     }
 
-    public static Bitmap drawableToBitmap(Drawable drawable) {
-        // 取 drawable 的长宽
-        int w = drawable.getIntrinsicWidth();
-        int h = drawable.getIntrinsicHeight();
-
-        // 取 drawable 的颜色格式
-        Bitmap.Config config = drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888
-                : Bitmap.Config.RGB_565;
-        // 建立对应 bitmap
-        Bitmap bitmap = Bitmap.createBitmap(w, h, config);
-        // 建立对应 bitmap 的画布
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, w, h);
-        // 把 drawable 内容画到画布中
-        drawable.draw(canvas);
-        return bitmap;
-    }
 
     private void loadDingBitmap(final ImageView imageView, int count) {
         CombineBitmap.get(imageView)
                 .setLayoutManager(new DingLayoutManager())
+                .setTextConfigManager(new DingTextBitmapConfigManager())
                 .setSize(180)
-                .setGap(2)
+                .setGap(3)
+                .setImageDatas(getImageData(count))
                 .setUrls(getUrls(count))
-                .setDefaultBitmapAndKeyProvider(new DefaultBitmapAndKeyProvider() {
-                    @Override
-                    public Bitmap provide(int count, int index) {
-                        return  drawableToBitmap(AvatarHelper.getInstance().makeDefaultDrawable("测",false));
-                    }
-
-                    @Override
-                    public String getKey(int count,int index) {
-                        return "测";
-                    }
-                })
                 .load();
     }
 }

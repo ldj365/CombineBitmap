@@ -50,7 +50,7 @@ public class WechatLayoutManager implements ILayoutManager {
                 } else if (i == 1) {
                     x = (size + gap) / 2.0f;
                     y = (size - 2 * subSize - gap) / 2.0f;
-                } else if (i > 1) {
+                } else {
                     x = gap + (i - 2) * (subSize + gap);
                     y = (size + gap) / 2.0f;
                 }

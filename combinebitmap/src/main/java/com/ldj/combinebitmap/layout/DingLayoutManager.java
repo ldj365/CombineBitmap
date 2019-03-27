@@ -23,11 +23,14 @@ public class DingLayoutManager implements ILayoutManager {
             if (bitmaps[i] == null) {
                 continue;
             }
-            subBitmap = Bitmap.createScaledBitmap(bitmaps[i], size, size, true);
+
             if (count == 2 || (count == 3 && i == 0)) {
+                subBitmap = Bitmap.createScaledBitmap(bitmaps[i], size, size, true);
                 subBitmap = Bitmap.createBitmap(subBitmap, (size + gap) / 4, 0, (size - gap) / 2, size);
             } else if ((count == 3 && (i == 1 || i == 2)) || count == 4) {
-                subBitmap = Bitmap.createBitmap(subBitmap, (size + gap) / 4, (size + gap) / 4, (size - gap) / 2, (size - gap) / 2);
+                subBitmap = Bitmap.createScaledBitmap(bitmaps[i], subSize, subSize, true);
+            } else {
+                subBitmap = Bitmap.createScaledBitmap(bitmaps[i], size, size, true);
             }
 
             int dx = dxy[i][0];

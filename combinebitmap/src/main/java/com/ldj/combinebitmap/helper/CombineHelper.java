@@ -10,13 +10,24 @@ public class CombineHelper {
         return CombineHelper.SingletonHolder.instance;
     }
 
-
     private CombineHelper() {
 
     }
 
     private static class SingletonHolder {
         private static final CombineHelper instance = new CombineHelper();
+    }
+
+    public void load(Builder builder) {
+        if (builder.getOnProgressListener() != null) {
+            builder.getOnProgressListener().onStart();
+        }
+
+        if (builder.getUrls() != null) {
+            loadByUrls(builder);
+        } else {
+            loadByResBitmaps(builder);
+        }
     }
 
     /**
@@ -27,8 +38,7 @@ public class CombineHelper {
     private void loadByUrls(final Builder builder) {
         Bitmap defaultBitmap = null;
         if (builder.getPlaceholder() != 0) {
-            defaultBitmap = CompressHelper.getInstance()
-                    .compressResource(builder.getContext().getResources(), builder.getPlaceholder(), builder.getSubSize(), builder.getSubSize());
+            defaultBitmap = CompressHelper.getInstance().compressResource(builder.getContext().getResources(), builder.getPlaceholder(), builder.getSubSize(), builder.getSubSize());
         }
         ProgressHandler handler = new ProgressHandler(defaultBitmap, builder.getCount(), new OnHandlerListener() {
             @Override
@@ -50,26 +60,12 @@ public class CombineHelper {
         Bitmap[] compressedBitmaps = new Bitmap[builder.getCount()];
         for (int i = 0; i < builder.getCount(); i++) {
             if (builder.getResourceIds() != null) {
-                compressedBitmaps[i] = CompressHelper.getInstance()
-                        .compressResource(builder.getContext().getResources(), builder.getResourceIds()[i], subSize, subSize);
+                compressedBitmaps[i] = CompressHelper.getInstance().compressResource(builder.getContext().getResources(), builder.getResourceIds()[i], subSize, subSize);
             } else if (builder.getBitmaps() != null) {
-                compressedBitmaps[i] = CompressHelper.getInstance()
-                        .compressResource(builder.getBitmaps()[i], subSize, subSize);
+                compressedBitmaps[i] = CompressHelper.getInstance().compressResource(builder.getBitmaps()[i], subSize, subSize);
             }
         }
         setBitmap(builder, compressedBitmaps);
-    }
-
-    public void load(Builder builder) {
-        if (builder.getOnProgressListener() != null) {
-            builder.getOnProgressListener().onStart();
-        }
-
-        if (builder.getUrls() != null) {
-            loadByUrls(builder);
-        } else {
-            loadByResBitmaps(builder);
-        }
     }
 
     private void setBitmap(final Builder b, Bitmap[] bitmaps) {

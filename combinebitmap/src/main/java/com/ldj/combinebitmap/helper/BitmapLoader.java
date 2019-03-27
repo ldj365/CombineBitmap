@@ -2,14 +2,19 @@ package com.ldj.combinebitmap.helper;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.PixelFormat;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.jakewharton.disklrucache.DiskLruCache;
+import com.ldj.combinebitmap.bean.ImageData;
+import com.ldj.combinebitmap.text.TextDrawable;
 import com.ldj.combinebitmap.cache.DiskLruCacheHelper;
 import com.ldj.combinebitmap.cache.LruCacheHelper;
-import com.ldj.combinebitmap.provider.DefaultBitmapAndKeyProvider;
+import com.ldj.combinebitmap.text.TextBitmapConfig;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -23,7 +28,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class BitmapLoader {
     private static String TAG = BitmapLoader.class.getSimpleName();
@@ -67,12 +71,11 @@ public class BitmapLoader {
         }
     }
 
-
-    public void asyncLoad(final int index, final Builder builder, final Handler handler) {
+    private void asyncLoad(final int index, final Builder builder, final Handler handler) {
         Runnable task = new Runnable() {
             @Override
             public void run() {
-                Bitmap bitmap = loadBitmap(builder.getCount(), index, builder.getUrls()[index], builder.getSubSize(), builder.getSubSize(), builder.getDefaultBitmapAndKeyProvider());
+                Bitmap bitmap = loadBitmap(index, builder);
                 if (bitmap != null) {
                     handler.obtainMessage(1, index, -1, bitmap).sendToTarget();
                 } else {
@@ -81,56 +84,50 @@ public class BitmapLoader {
             }
         };
 
-        if (collectUndoTasks(getOriginalUrl(builder.getCount(),index, builder.getUrls()[index], builder.getDefaultBitmapAndKeyProvider()), task)) {
+        if (collectUndoTasks(builder.getKey(index), task)) {
             return;
         }
 
         ThreadPool.getInstance().execute(task);
     }
 
-    private String getOriginalUrl(int count,int index, String url, DefaultBitmapAndKeyProvider provider) {
-        String key;
-        if (TextUtils.isEmpty(url)) {
-            if (provider != null) {
-                key = provider.getKey(count,index);
-            } else {
-                key = "";
-            }
-        } else {
-            key = url;
-        }
-        return key;
-    }
 
-    private Bitmap loadBitmap(int count, int index, String url, int reqWidth, int reqHeight, DefaultBitmapAndKeyProvider defaultBitmapAndKeyProvider) {
-        url = getOriginalUrl(count,index, url, defaultBitmapAndKeyProvider);
-        String key = Utils.hashKeyFormUrl(url);
+    private Bitmap loadBitmap(int index, Builder builder) {
+        String key = builder.getKey(index);
 
         // 尝试从内存缓存中读取
         Bitmap bitmap = lruCacheHelper.getBitmapFromMemCache(key);
         if (bitmap != null) {
-            Log.e(TAG, "load from memory:" + url);
+            Log.e(TAG, "load from memory:" + key);
             return bitmap;
         }
 
         try {
             // 尝试从磁盘缓存中读取
-            bitmap = loadBitmapFromDiskCache(url, reqWidth, reqHeight);
+            bitmap = loadBitmapFromDiskCache(index, builder);
             if (bitmap != null) {
-                Log.e(TAG, "load from disk:" + url);
-                return bitmap;
-            }
-            // 尝试下载
-            bitmap = loadBitmapFromHttp(url, reqWidth, reqHeight);
-            if (bitmap != null) {
-                Log.e(TAG, "load from http:" + url);
+                Log.e(TAG, "load from disk:" + key);
                 return bitmap;
             }
 
-            //尝试从DefaultBitmapProvider获取
-            bitmap = loadBitmapFromProvider(count, index, reqWidth, reqHeight, defaultBitmapAndKeyProvider);
+            // 尝试下载
+            bitmap = loadBitmapFromHttp(index, builder);
             if (bitmap != null) {
-                Log.e(TAG, "load from provider:" + url);
+                Log.e(TAG, "load from http:" + key);
+                return bitmap;
+            }
+
+            //尝试生成文字 Bitmap
+            bitmap = createBitmapFromText(index, builder);
+            if (bitmap != null) {
+                Log.e(TAG, "load from text:" + key);
+                return bitmap;
+            }
+
+            //尝试加载默认图
+            bitmap = loadBitmapFromRes(index, builder);
+            if (bitmap != null) {
+                Log.e(TAG, "load from res:" + key);
                 return bitmap;
             }
         } catch (IOException e) {
@@ -140,36 +137,37 @@ public class BitmapLoader {
         return bitmap;
     }
 
-    private Bitmap loadBitmapFromProvider(int count, int index, int reqWidth, int reqHeight, DefaultBitmapAndKeyProvider provider) throws IOException {
-        if (provider == null) {
-            return null;
-        }
-        String url = getOriginalUrl(count,index, "", provider);
-        String key = Utils.hashKeyFormUrl(url);
-        Bitmap bitmap = provider.provide(count, index);
-        if (bitmap == null) {
-            return null;
+    /**
+     * 从硬盘读取
+     */
+    private Bitmap loadBitmapFromDiskCache(int index, Builder builder) throws IOException {
+        Bitmap bitmap = null;
+        String key = builder.getKey(index);
+        DiskLruCache.Snapshot snapShot = mDiskLruCache.get(key);
+        if (snapShot != null) {
+            FileInputStream fileInputStream = (FileInputStream) snapShot.getInputStream(0);
+            FileDescriptor fileDescriptor = fileInputStream.getFD();
+            bitmap = compressHelper.compressDescriptor(fileDescriptor, builder.getSubSize(), builder.getSubSize());
+            if (bitmap != null) {
+                lruCacheHelper.addBitmapToMemoryCache(key, bitmap);
+            }
         }
 
-        DiskLruCache.Editor editor = mDiskLruCache.edit(key);
-        if (editor != null) {
-            OutputStream outputStream = editor.newOutputStream(0);
-            if (bitmap.compress(Bitmap.CompressFormat.WEBP, 100, outputStream)) {
-                editor.commit();
-            } else {
-                editor.abort();
-            }
-            mDiskLruCache.flush();
-            executeUndoTasks(url);
-        }
-        return loadBitmapFromDiskCache(url, reqWidth, reqHeight);
+        return bitmap;
     }
 
 
-    private Bitmap loadBitmapFromHttp(String url, int reqWidth, int reqHeight)
+    /**
+     * 从网络下载
+     */
+    private Bitmap loadBitmapFromHttp(int index, Builder builder)
             throws IOException {
-        String key = Utils.hashKeyFormUrl(url);
-        DiskLruCache.Editor editor = mDiskLruCache.edit(key);
+        String url = builder.getPayLoadUrl(index);
+        if (TextUtils.isEmpty(url)) {
+            return null;
+        }
+
+        DiskLruCache.Editor editor = mDiskLruCache.edit(builder.getKey(index));
         if (editor != null) {
             OutputStream outputStream = editor.newOutputStream(0);
             if (downloadUrlToStream(url, outputStream)) {
@@ -179,13 +177,13 @@ public class BitmapLoader {
             }
             mDiskLruCache.flush();
 
-            executeUndoTasks(url);
+            executeUndoTasks(builder.getKey(index));
         }
-        return loadBitmapFromDiskCache(url, reqWidth, reqHeight);
+        return loadBitmapFromDiskCache(index, builder);
     }
 
     private boolean downloadUrlToStream(String urlString, OutputStream outputStream) {
-        if( urlString == null || urlString.length() == 0 || !Pattern.matches("\"[a-zA-z]+://[^\\\\s]*\"", urlString)){
+        if (!urlString.startsWith("http")) {
             return false;
         }
 
@@ -216,25 +214,91 @@ public class BitmapLoader {
         return false;
     }
 
-    private Bitmap loadBitmapFromDiskCache(String url, int reqWidth, int reqHeight) throws IOException {
-        Bitmap bitmap = null;
-        String key = Utils.hashKeyFormUrl(url);
-        DiskLruCache.Snapshot snapShot = mDiskLruCache.get(key);
-        if (snapShot != null) {
-            FileInputStream fileInputStream = (FileInputStream) snapShot.getInputStream(0);
-            FileDescriptor fileDescriptor = fileInputStream.getFD();
-            bitmap = compressHelper.compressDescriptor(fileDescriptor, reqWidth, reqHeight);
-            if (bitmap != null) {
-                lruCacheHelper.addBitmapToMemoryCache(key, bitmap);
-            }
+    /**
+     * 生成带文字的 bitmap
+     */
+    private Bitmap createBitmapFromText(int index, Builder builder) throws IOException {
+        if (builder.getTextConfigManager() == null || builder.getImageDatas() == null || TextUtils.isEmpty(builder.getImageDatas()[index].getText())) {
+            return null;
         }
+        TextBitmapConfig textBitmapConfig = builder.getTextConfigManager().getTextConfig(builder.getCount(), index, builder.getSize(), builder.getSubSize(), builder.getImageDatas()[index].getText());
+        Drawable drawable = TextDrawable.builder()
+                .beginConfig()
+                .fontSize(textBitmapConfig.getTextSize())
+                .textColor(textBitmapConfig.getTextColor())
+                .height(textBitmapConfig.getHeight())
+                .width(textBitmapConfig.getWidth())
+                .endConfig()
+                .buildRect(textBitmapConfig.getText(), textBitmapConfig.getTextBackgroundColor());
 
+        Bitmap bitmap = drawableToBitmap(drawable);
+        String key = builder.getKey(index);
+        DiskLruCache.Editor editor = mDiskLruCache.edit(key);
+        if (editor != null) {
+            OutputStream outputStream = editor.newOutputStream(0);
+            if (bitmap.compress(Bitmap.CompressFormat.WEBP, 100, outputStream)) {
+                editor.commit();
+            } else {
+                editor.abort();
+            }
+            mDiskLruCache.flush();
+            lruCacheHelper.addBitmapToMemoryCache(key, bitmap);
+            executeUndoTasks(key);
+        }
         return bitmap;
     }
 
-    private boolean collectUndoTasks(String url, Runnable task) {
-        String key = Utils.hashKeyFormUrl(url);
+    /**
+     * 把 drawable 转成 bitmap
+     */
+    private Bitmap drawableToBitmap(Drawable drawable) {
+        // 取 drawable 的长宽
+        int w = drawable.getIntrinsicWidth();
+        int h = drawable.getIntrinsicHeight();
 
+        // 取 drawable 的颜色格式
+        Bitmap.Config config = drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888
+                : Bitmap.Config.RGB_565;
+        // 建立对应 bitmap
+        Bitmap bitmap = Bitmap.createBitmap(w, h, config);
+        // 建立对应 bitmap 的画布
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, w, h);
+        // 把 drawable 内容画到画布中
+        drawable.draw(canvas);
+        return bitmap;
+    }
+
+    /**
+     * 从资源文件加载定制的图片
+     */
+    private Bitmap loadBitmapFromRes(int index, Builder builder) throws IOException{
+        if (builder.getTextConfigManager() == null || builder.getImageDatas() == null || builder.getImageDatas()[index].getPlaceHolder() == 0) {
+            return null;
+        }
+        TextBitmapConfig textBitmapConfig = builder.getTextConfigManager().getTextConfig(builder.getCount(), index, builder.getSize(), builder.getSubSize(), builder.getImageDatas()[index].getText());
+        Bitmap bitmap= CompressHelper.getInstance().compressResource(builder.getContext().getResources(), builder.getImageDatas()[index].getPlaceHolder(), textBitmapConfig.getWidth(), textBitmapConfig.getHeight());
+        String key = builder.getKey(index);
+        DiskLruCache.Editor editor = mDiskLruCache.edit(key);
+        if (editor != null) {
+            OutputStream outputStream = editor.newOutputStream(0);
+            if (bitmap.compress(Bitmap.CompressFormat.WEBP, 100, outputStream)) {
+                editor.commit();
+            } else {
+                editor.abort();
+            }
+            mDiskLruCache.flush();
+            lruCacheHelper.addBitmapToMemoryCache(key, bitmap);
+            executeUndoTasks(key);
+        }
+        return bitmap;
+    }
+
+
+    /**
+     * 收集撤销任务
+     */
+    private synchronized boolean collectUndoTasks(String key, Runnable task) {
         if (lruCacheHelper.getBitmapFromMemCache(key) != null) {
             return false;
         }
@@ -264,13 +328,15 @@ public class BitmapLoader {
             }
             return true;
         }
-
         doingTasks.put(key, task);
         return false;
     }
 
-    private void executeUndoTasks(String url) {
-        String key = Utils.hashKeyFormUrl(url);
+
+    /**
+     * 执行撤销任务
+     */
+    private synchronized void executeUndoTasks(String key) {
         // 检查undoTasks中是否有要执行的任务
         if (undoTasks.containsKey(key)) {
             for (Runnable task : undoTasks.get(key)) {

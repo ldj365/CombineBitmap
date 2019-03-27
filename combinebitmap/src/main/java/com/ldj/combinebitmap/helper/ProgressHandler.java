@@ -30,6 +30,8 @@ public class ProgressHandler extends Handler {
             case 2://失败
                 bitmaps[msg.arg1] = defaultBitmap;
                 break;
+            default:
+                break;
         }
         i++;
         if (i == bitmaps.length && listener != null) {

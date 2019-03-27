@@ -6,19 +6,21 @@ import android.graphics.Point;
 import android.graphics.Region;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
+import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.ldj.combinebitmap.bean.ImageData;
 import com.ldj.combinebitmap.layout.DingLayoutManager;
 import com.ldj.combinebitmap.layout.ILayoutManager;
 import com.ldj.combinebitmap.layout.WechatLayoutManager;
-import com.ldj.combinebitmap.provider.DefaultBitmapAndKeyProvider;
 import com.ldj.combinebitmap.listener.OnProgressListener;
 import com.ldj.combinebitmap.listener.OnSubItemClickListener;
 import com.ldj.combinebitmap.region.DingRegionManager;
 import com.ldj.combinebitmap.region.IRegionManager;
 import com.ldj.combinebitmap.region.WechatRegionManager;
+import com.ldj.combinebitmap.text.ITextBitmapConfigManager;
 
 public class Builder {
     private Context context;
@@ -32,16 +34,17 @@ public class Builder {
 
     private ILayoutManager layoutManager; // bitmap的组合样式
 
+    private ITextBitmapConfigManager textConfigManager;//文字的大小颜色配置
+
     private Region[] regions;
     private OnSubItemClickListener onSubItemClickListener; // 单个bitmap点击事件回调
 
     private OnProgressListener onProgressListener; // 最终的组合bitmap回调接口
 
-    private DefaultBitmapAndKeyProvider defaultBitmapAndKeyProvider; //自定义默认图提供者,优先级高于 placeholder
-
+    private ImageData[] imageDatas;
+    private String[] urls;
     private Bitmap[] bitmaps;
     private int[] resourceIds;
-    private String[] urls;
 
     public Builder(Context context) {
         this.context = context;
@@ -82,6 +85,11 @@ public class Builder {
         return this;
     }
 
+    public Builder setTextConfigManager(ITextBitmapConfigManager textConfigManager) {
+        this.textConfigManager = textConfigManager;
+        return this;
+    }
+
     public Builder setOnProgressListener(OnProgressListener onProgressListener) {
         this.onProgressListener = onProgressListener;
         return this;
@@ -92,20 +100,21 @@ public class Builder {
         return this;
     }
 
-    public Builder setDefaultBitmapAndKeyProvider(DefaultBitmapAndKeyProvider defaultBitmapAndKeyProvider) {
-        this.defaultBitmapAndKeyProvider = defaultBitmapAndKeyProvider;
-        return this;
-    }
-
-    public Builder setBitmaps(Bitmap... bitmaps) {
-        this.bitmaps = bitmaps;
-        this.count = bitmaps.length;
+    public Builder setImageDatas(ImageData[] imageDatas) {
+        this.imageDatas = imageDatas;
+        this.count = imageDatas.length;
         return this;
     }
 
     public Builder setUrls(String... urls) {
         this.urls = urls;
         this.count = urls.length;
+        return this;
+    }
+
+    public Builder setBitmaps(Bitmap... bitmaps) {
+        this.bitmaps = bitmaps;
+        this.count = bitmaps.length;
         return this;
     }
 
@@ -151,6 +160,10 @@ public class Builder {
         return layoutManager;
     }
 
+    public ITextBitmapConfigManager getTextConfigManager() {
+        return textConfigManager;
+    }
+
     public Region[] getRegions() {
         return regions;
     }
@@ -163,8 +176,12 @@ public class Builder {
         return onProgressListener;
     }
 
-    public DefaultBitmapAndKeyProvider getDefaultBitmapAndKeyProvider() {
-        return defaultBitmapAndKeyProvider;
+    public ImageData[] getImageDatas() {
+        return imageDatas;
+    }
+
+    public String[] getUrls() {
+        return urls;
     }
 
     public Bitmap[] getBitmaps() {
@@ -175,8 +192,32 @@ public class Builder {
         return resourceIds;
     }
 
-    public String[] getUrls() {
-        return urls;
+    public String getKey(int index) {
+        return Utils.hashKeyFormUrl(getDesc(index));
+    }
+
+    public String getDesc(int index) {
+        String key = "";
+        if (imageDatas != null) {
+            if (!TextUtils.isEmpty(imageDatas[index].getUrl())) {
+                key = imageDatas[index].getUrl();
+            } else if (!TextUtils.isEmpty(imageDatas[index].getText())) {
+                if (getTextConfigManager() != null) {
+                    key = getTextConfigManager().getTextConfig(getCount(), index, getSize(), getSubSize(), imageDatas[index].getText()).getTag();
+                } else {
+                    key = imageDatas[index].getTag();
+                }
+            } else {
+                key = "" + imageDatas[index].getPlaceHolder();
+            }
+        } else if (urls != null) {
+            key = urls[index];
+        }
+        return key;
+    }
+
+    public String getPayLoadUrl(int index) {
+        return getImageDatas() == null ? getUrls()[index] : getImageDatas()[index].getUrl();
     }
 
     public void load() {
@@ -198,7 +239,11 @@ public class Builder {
     private int getSubSize(int size, int gap, ILayoutManager layoutManager, int count) {
         int subSize = 0;
         if (layoutManager instanceof DingLayoutManager) {
-            subSize = size;
+            if (count == 1) {
+                subSize = size;
+            } else {
+                subSize = (size - gap) / 2;
+            }
         } else if (layoutManager instanceof WechatLayoutManager) {
             if (count < 2) {
                 subSize = size;
