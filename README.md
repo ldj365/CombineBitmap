@@ -1,5 +1,6 @@
 # CombineBitmap
 
+[![](https://jitpack.io/v/ldj365/CombineBitmap.svg)](https://jitpack.io/#ldj365/CombineBitmap)
 ### 效果预览
 
 |![](images/d1.PNG)|![](images/d2.PNG)|![](images/d3.PNG)||
@@ -10,10 +11,12 @@
 ### 功能
 * 生成类似钉钉、微信 群聊组合头像Bitmap
 * 可使用图片资源id、bitmap或者使用url从网络加载，传入对应数组即可
+* 支持 url, 文字图片,图片资源 id,全局默认图四种加载逻辑依次加载 bitmap, 只需传入 ImageData即可
 * 网络加载时支持线程池
 * 支持磁盘缓存、内存缓存。（**记得申请磁盘缓存需要的文件存储权限**）
 * 对图片资源进行采样率压缩
 * 支持子图像的点击事件
+* 支持按照制定规则生成文字 bitmap
 * ......
 ### 基本用法
 **Step 1. 添加JitPack仓库**
@@ -29,7 +32,7 @@ allprojects {
 **Step 2. 添加项目依赖**
 ``` gradle
 dependencies {
-    implementation 'com.github.Othershe:CombineBitmap:1.0.5'
+    implementation 'com.github.ldj365:CombineBitmap:lastVersion'
 }
 ```
 **Step 3. 配置**
@@ -41,6 +44,7 @@ CombineBitmap.init(context)
     .setGapColor() // 单个图片间距的颜色，默认白色
     .setPlaceholder() // 单个图片加载失败的默认显示图片
     .setUrls() // 要加载的图片url数组
+    .setImageDatas(getImageData(count))  //要加载的多维度图片数组
     .setBitmaps() // 要加载的图片bitmap数组
     .setResourceIds() // 要加载的图片资源id数组
     .setImageView() // 直接设置要显示图片的ImageView

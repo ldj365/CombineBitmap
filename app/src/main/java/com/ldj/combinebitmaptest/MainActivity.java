@@ -68,12 +68,15 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         return urls;
     }
 
-    private ImageData[] getImageData(int count){
-        ImageData[] imageDatas=new ImageData[count];
+    private ImageData[] getImageData(int count) {
+        ImageData[] imageDatas = new ImageData[count];
         for (int i = 0; i < count; i++) {
-            imageDatas[i]=new ImageData(IMG_URL_ARR[i],"图"+i,R.drawable.cat);
+            imageDatas[i] = new ImageData(IMG_URL_ARR[i], "图" + i, R.drawable.cat);
         }
-        imageDatas[count-1]=new ImageData(R.drawable.cat);
+        imageDatas[count - 1] = new ImageData(R.drawable.cat);
+        if (imageDatas.length > 2) {
+            imageDatas[count - 2] = new ImageData("","图");
+        }
         return imageDatas;
     }
 
