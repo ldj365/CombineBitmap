@@ -30,14 +30,16 @@
             android:layout_width="180dp"
             android:layout_height="180dp"
             android:layout_marginTop="10dp"
-            app:is_circle="true" />
+            app:corner_radius="4dp"
+            app:is_circle="false" />
 
         <com.shehuan.niv.NiceImageView
             android:id="@+id/nice_iv4"
             android:layout_width="180dp"
             android:layout_height="180dp"
             android:layout_marginTop="10dp"
-            app:is_circle="true" />
+            app:corner_radius="4dp"
+            app:is_circle="false" />
 
 
         <ImageView

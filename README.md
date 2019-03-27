@@ -3,11 +3,7 @@
 [![](https://jitpack.io/v/ldj365/CombineBitmap.svg)](https://jitpack.io/#ldj365/CombineBitmap)
 ### 效果预览
 
-|![](images/d1.PNG)|![](images/d2.PNG)|![](images/d3.PNG)||
-|---|---|---|---|
-|![](images/w1.PNG)|![](images/w2.PNG)|![](images/w3.PNG)|![](images/w4.PNG)|
-|![](images/w5.PNG)|![](images/w6.PNG)|![](images/w7.PNG)|![](images/w8.PNG)|
-
+![](images/Screenshot.jpg)
 ### 功能
 * 生成类似钉钉、微信 群聊组合头像Bitmap
 * 可使用图片资源id、bitmap或者使用url从网络加载，传入对应数组即可

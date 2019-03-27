@@ -92,7 +92,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ScreenUtil.init(this);
         imageView1 = findViewById(R.id.nice_iv1);
         imageView2 = findViewById(R.id.nice_iv2);
         imageView3 = findViewById(R.id.nice_iv3);
