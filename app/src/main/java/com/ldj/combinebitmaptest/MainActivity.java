@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 .setGap(3)
                 .setGapColor(Color.parseColor("#E8E8E8"))
                 .setImageDatas(getImageData(count))
-                .setUrls(getUrls(count))
+//                .setUrls(getUrls(count))
                 .setOnSubItemClickListener(new OnSubItemClickListener() {
                     @Override
                     public void onSubItemClick(int index) {
@@ -192,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 .setSize(180)
                 .setGap(3)
                 .setImageDatas(getImageData(count))
-                .setUrls(getUrls(count))
+//                .setUrls(getUrls(count))
                 .load();
     }
 }

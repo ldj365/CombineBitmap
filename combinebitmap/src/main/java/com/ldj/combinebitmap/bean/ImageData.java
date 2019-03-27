@@ -55,9 +55,9 @@ public class ImageData {
     }
 
     public String getTag() {
-        return "ImageData : url = " + url + ";" +
-                " textOriginal = " + text + ";" +
-                " placeHolder = " + placeHolder + ";";
+        return "ImageData : url = " + url + "; " +
+                " textOriginal = " + text + "; " +
+                " placeHolder = " + placeHolder + "; ";
 
     }
 }

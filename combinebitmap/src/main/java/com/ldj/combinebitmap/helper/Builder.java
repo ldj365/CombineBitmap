@@ -216,6 +216,15 @@ public class Builder {
         return key;
     }
 
+    public String getKey(){
+        StringBuilder stringBuilder=new StringBuilder();
+        stringBuilder.append("TotalKey : ");
+        for (int i = 0; i < count; i++) {
+            stringBuilder.append(getDesc(i));
+        }
+        return Utils.hashKeyFormUrl(stringBuilder.toString());
+    }
+
     public String getPayLoadUrl(int index) {
         return getImageDatas() == null ? getUrls()[index] : getImageDatas()[index].getUrl();
     }

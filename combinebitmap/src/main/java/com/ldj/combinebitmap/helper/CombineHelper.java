@@ -1,6 +1,7 @@
 package com.ldj.combinebitmap.helper;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.ldj.combinebitmap.listener.OnHandlerListener;
 
@@ -23,8 +24,8 @@ public class CombineHelper {
             builder.getOnProgressListener().onStart();
         }
 
-        if (builder.getUrls() != null) {
-            loadByUrls(builder);
+        if (builder.getUrls() != null||builder.getImageDatas()!=null) {
+            loadByUrlsImageDatas(builder);
         } else {
             loadByResBitmaps(builder);
         }
@@ -35,7 +36,7 @@ public class CombineHelper {
      *
      * @param builder
      */
-    private void loadByUrls(final Builder builder) {
+    private void loadByUrlsImageDatas(final Builder builder) {
         Bitmap defaultBitmap = null;
         if (builder.getPlaceholder() != 0) {
             defaultBitmap = CompressHelper.getInstance().compressResource(builder.getContext().getResources(), builder.getPlaceholder(), builder.getSubSize(), builder.getSubSize());
@@ -68,17 +69,16 @@ public class CombineHelper {
         setBitmap(builder, compressedBitmaps);
     }
 
-    private void setBitmap(final Builder b, Bitmap[] bitmaps) {
-        Bitmap result = b.getLayoutManager().combineBitmap(b.getSize(), b.getSubSize(), b.getGap(), b.getGapColor(), bitmaps);
-
+    private void setBitmap(final Builder builder, Bitmap[] bitmaps) {
+        Bitmap result = builder.getLayoutManager().combineBitmap(builder.getSize(), builder.getSubSize(), builder.getGap(), builder.getGapColor(), bitmaps);
         // 返回最终的组合Bitmap
-        if (b.getOnProgressListener() != null) {
-            b.getOnProgressListener().onComplete(result);
+        if (builder.getOnProgressListener() != null) {
+            builder.getOnProgressListener().onComplete(result);
         }
 
         // 给ImageView设置最终的组合Bitmap
-        if (b.getImageView() != null) {
-            b.getImageView().setImageBitmap(result);
+        if (builder.getImageView() != null) {
+            builder.getImageView().setImageBitmap(result);
         }
     }
 }

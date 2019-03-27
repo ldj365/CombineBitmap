@@ -67,11 +67,11 @@ public class TextBitmapConfig {
     }
 
     public String getTag() {
-        return " TextBitmapConfig : textFinal = " + text + ";" +
-                " textColor = " + textColor + ";" +
-                " textBackgroundColor = " + textBackgroundColor + ";" +
-                " textSize = " + textSize + ";" +
-                " width = " + width + ";" +
-                " height = " + height + ";";
+        return " TextBitmapConfig : textFinal = " + text + "; " +
+                " textColor = " + textColor + "; " +
+                " textBackgroundColor = " + textBackgroundColor + "; " +
+                " textSize = " + textSize + "; " +
+                " width = " + width + "; " +
+                " height = " + height + "; ";
     }
 }
