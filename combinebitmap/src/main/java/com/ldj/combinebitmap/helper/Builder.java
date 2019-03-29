@@ -100,7 +100,7 @@ public class Builder {
         return this;
     }
 
-    public Builder setImageDatas(ImageData[] imageDatas) {
+    public Builder setImageDatas(ImageData... imageDatas) {
         this.imageDatas = imageDatas;
         this.count = imageDatas.length;
         urls=null;
