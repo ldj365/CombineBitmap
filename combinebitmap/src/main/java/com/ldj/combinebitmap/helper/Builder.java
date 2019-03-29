@@ -103,24 +103,36 @@ public class Builder {
     public Builder setImageDatas(ImageData[] imageDatas) {
         this.imageDatas = imageDatas;
         this.count = imageDatas.length;
+        urls=null;
+        bitmaps=null;
+        resourceIds=null;
         return this;
     }
 
     public Builder setUrls(String... urls) {
         this.urls = urls;
         this.count = urls.length;
+        imageDatas=null;
+        bitmaps=null;
+        resourceIds=null;
         return this;
     }
 
     public Builder setBitmaps(Bitmap... bitmaps) {
         this.bitmaps = bitmaps;
         this.count = bitmaps.length;
+        imageDatas=null;
+        urls=null;
+        resourceIds=null;
         return this;
     }
 
     public Builder setResourceIds(int... resourceIds) {
         this.resourceIds = resourceIds;
         this.count = resourceIds.length;
+        imageDatas=null;
+        urls=null;
+        bitmaps=null;
         return this;
     }
 
