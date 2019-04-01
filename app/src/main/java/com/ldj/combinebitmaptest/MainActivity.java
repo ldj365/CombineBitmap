@@ -115,19 +115,19 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
         if (EasyPermissions.hasPermissions(this, perms)) {
             loadDingBitmap(imageView1, 1);
-            loadDingBitmap(imageView2, 2);
-            loadDingBitmap(imageView3, 3);
-            loadDingBitmap(imageView44, 4);
-
-            loadWechatBitmap(imageView4, 1);
-            loadWechatBitmap(imageView5, 2);
-            loadWechatBitmap(imageView6, 3);
-            loadWechatBitmap(imageView7, 4);
-            loadWechatBitmap(imageView8, 5);
-            loadWechatBitmap(imageView9, 6);
-            loadWechatBitmap(imageView10, 7);
-            loadWechatBitmap(imageView11, 8);
-            loadWechatBitmap(imageView11, 9);
+//            loadDingBitmap(imageView2, 2);
+//            loadDingBitmap(imageView3, 3);
+//            loadDingBitmap(imageView44, 4);
+//
+//            loadWechatBitmap(imageView4, 1);
+//            loadWechatBitmap(imageView5, 2);
+//            loadWechatBitmap(imageView6, 3);
+//            loadWechatBitmap(imageView7, 4);
+//            loadWechatBitmap(imageView8, 5);
+//            loadWechatBitmap(imageView9, 6);
+//            loadWechatBitmap(imageView10, 7);
+//            loadWechatBitmap(imageView11, 8);
+//            loadWechatBitmap(imageView11, 9);
 
         } else {
             EasyPermissions.requestPermissions(this, "need storage permission", 1000, perms);
@@ -194,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 .setSize(180)
                 .setGap(3)
                 .setImageDatas(getImageData(count))
-//                .setUrls(getUrls(count))
+//                .setUrls("http://static.dingtalk.com/media/lADOiCA0080C7M0C7A_748_748.jpg")
                 .load();
     }
 }

@@ -184,6 +184,7 @@ public class BitmapLoader {
 
     private boolean downloadUrlToStream(String urlString, OutputStream outputStream) {
         if (!urlString.startsWith("http")) {
+            Utils.close(outputStream);
             return false;
         }
 
@@ -192,8 +193,12 @@ public class BitmapLoader {
         BufferedInputStream in = null;
 
         try {
-            final URL url = new URL(urlString);
-            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection = (HttpURLConnection) new URL(urlString).openConnection();
+            if (urlConnection.getResponseCode() == 302 || urlConnection.getResponseCode() == 301) {
+                String newUrl = urlConnection.getHeaderField("Location");
+                urlConnection.disconnect();
+                urlConnection = (HttpURLConnection) new URL(newUrl).openConnection();
+            }
             in = new BufferedInputStream(urlConnection.getInputStream(), BUFFER_SIZE);
             out = new BufferedOutputStream(outputStream, BUFFER_SIZE);
 
@@ -272,12 +277,12 @@ public class BitmapLoader {
     /**
      * 从资源文件加载定制的图片
      */
-    private Bitmap loadBitmapFromRes(int index, Builder builder) throws IOException{
+    private Bitmap loadBitmapFromRes(int index, Builder builder) throws IOException {
         if (builder.getTextConfigManager() == null || builder.getImageDatas() == null || builder.getImageDatas()[index].getPlaceHolder() == 0) {
             return null;
         }
         TextBitmapConfig textBitmapConfig = builder.getTextConfigManager().getTextConfig(builder.getCount(), index, builder.getSize(), builder.getSubSize(), builder.getImageDatas()[index].getText());
-        Bitmap bitmap= CompressHelper.getInstance().compressResource(builder.getContext().getResources(), builder.getImageDatas()[index].getPlaceHolder(), textBitmapConfig.getWidth(), textBitmapConfig.getHeight());
+        Bitmap bitmap = CompressHelper.getInstance().compressResource(builder.getContext().getResources(), builder.getImageDatas()[index].getPlaceHolder(), textBitmapConfig.getWidth(), textBitmapConfig.getHeight());
         String key = builder.getKey(index);
         DiskLruCache.Editor editor = mDiskLruCache.edit(key);
         if (editor != null) {
