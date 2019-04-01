@@ -28,8 +28,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
     private String[] IMG_URL_ARR = {
             "",
+            "http://static.dingtalk.com/media/lADOiCA0080C7M0C7A_748_748.jpg",
             "http://img.hb.aicdn.com/eca438704a81dd1fa83347cb8ec1a49ec16d2802c846-laesx2_fw658",
-            "http://img.hb.aicdn.com/85579fa12b182a3abee62bd3fceae0047767857fe6d4-99Wtzp_fw658",
             "http://img.hb.aicdn.com/2814e43d98ed41e8b3393b0ff8f08f98398d1f6e28a9b-xfGDIC_fw658",
             "http://img.hb.aicdn.com/a1f189d4a420ef1927317ebfacc2ae055ff9f212148fb-iEyFWS_fw658",
             "http://img.hb.aicdn.com/69b52afdca0ae780ee44c6f14a371eee68ece4ec8a8ce-4vaO0k_fw658",
@@ -115,19 +115,19 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
         if (EasyPermissions.hasPermissions(this, perms)) {
             loadDingBitmap(imageView1, 1);
-//            loadDingBitmap(imageView2, 2);
-//            loadDingBitmap(imageView3, 3);
-//            loadDingBitmap(imageView44, 4);
-//
-//            loadWechatBitmap(imageView4, 1);
-//            loadWechatBitmap(imageView5, 2);
-//            loadWechatBitmap(imageView6, 3);
-//            loadWechatBitmap(imageView7, 4);
-//            loadWechatBitmap(imageView8, 5);
-//            loadWechatBitmap(imageView9, 6);
-//            loadWechatBitmap(imageView10, 7);
-//            loadWechatBitmap(imageView11, 8);
-//            loadWechatBitmap(imageView11, 9);
+            loadDingBitmap(imageView2, 2);
+            loadDingBitmap(imageView3, 3);
+            loadDingBitmap(imageView44, 4);
+
+            loadWechatBitmap(imageView4, 1);
+            loadWechatBitmap(imageView5, 2);
+            loadWechatBitmap(imageView6, 3);
+            loadWechatBitmap(imageView7, 4);
+            loadWechatBitmap(imageView8, 5);
+            loadWechatBitmap(imageView9, 6);
+            loadWechatBitmap(imageView10, 7);
+            loadWechatBitmap(imageView11, 8);
+            loadWechatBitmap(imageView12, 9);
 
         } else {
             EasyPermissions.requestPermissions(this, "need storage permission", 1000, perms);
@@ -194,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 .setSize(180)
                 .setGap(3)
                 .setImageDatas(getImageData(count))
-//                .setUrls("http://static.dingtalk.com/media/lADOiCA0080C7M0C7A_748_748.jpg")
+//                .setUrls(getUrls(count))
                 .load();
     }
 }

@@ -66,8 +66,8 @@ public class TextBitmapConfig {
         return height;
     }
 
-    public String getTag() {
-        return " TextBitmapConfig : textFinal = " + text + "; " +
+    public String getDesc() {
+        return " TextBitmap : textFinal = " + text + "; " +
                 " textColor = " + textColor + "; " +
                 " textBackgroundColor = " + textBackgroundColor + "; " +
                 " textSize = " + textSize + "; " +

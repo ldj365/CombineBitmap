@@ -103,36 +103,36 @@ public class Builder {
     public Builder setImageDatas(ImageData... imageDatas) {
         this.imageDatas = imageDatas;
         this.count = imageDatas.length;
-        urls=null;
-        bitmaps=null;
-        resourceIds=null;
+        urls = null;
+        bitmaps = null;
+        resourceIds = null;
         return this;
     }
 
     public Builder setUrls(String... urls) {
         this.urls = urls;
         this.count = urls.length;
-        imageDatas=null;
-        bitmaps=null;
-        resourceIds=null;
+        imageDatas = null;
+        bitmaps = null;
+        resourceIds = null;
         return this;
     }
 
     public Builder setBitmaps(Bitmap... bitmaps) {
         this.bitmaps = bitmaps;
         this.count = bitmaps.length;
-        imageDatas=null;
-        urls=null;
-        resourceIds=null;
+        imageDatas = null;
+        urls = null;
+        resourceIds = null;
         return this;
     }
 
     public Builder setResourceIds(int... resourceIds) {
         this.resourceIds = resourceIds;
         this.count = resourceIds.length;
-        imageDatas=null;
-        urls=null;
-        bitmaps=null;
+        imageDatas = null;
+        urls = null;
+        bitmaps = null;
         return this;
     }
 
@@ -204,41 +204,30 @@ public class Builder {
         return resourceIds;
     }
 
-    public String getKey(int index) {
-        return Utils.hashKeyFormUrl(getDesc(index));
+
+    public String getPayLoadUrl(int index) {
+        return getImageDatas() == null ? getUrls()[index] : getImageDatas()[index].getUrl();
     }
 
-    public String getDesc(int index) {
+    public String getDefaultDesc(int index) {
         String key = "";
         if (imageDatas != null) {
-            if (!TextUtils.isEmpty(imageDatas[index].getUrl())) {
-                key = imageDatas[index].getUrl();
-            } else if (!TextUtils.isEmpty(imageDatas[index].getText())) {
-                if (getTextConfigManager() != null) {
-                    key = getTextConfigManager().getTextConfig(getCount(), index, getSize(), getSubSize(), imageDatas[index].getText()).getTag();
-                } else {
-                    key = imageDatas[index].getTag();
-                }
+            if (!TextUtils.isEmpty(imageDatas[index].getText()) && getTextConfigManager() != null) {
+                key = getTextConfigManager().getTextConfig(getCount(), index, getSize(), getSubSize(), imageDatas[index].getText()).getDesc();
             } else {
-                key = "" + imageDatas[index].getPlaceHolder();
+                key = "PlaceHolder : " + imageDatas[index].getPlaceHolder();
             }
-        } else if (urls != null) {
-            key = urls[index];
         }
         return key;
     }
 
-    public String getKey(){
-        StringBuilder stringBuilder=new StringBuilder();
+    public String getKey() {
+        StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("TotalKey : ");
         for (int i = 0; i < count; i++) {
-            stringBuilder.append(getDesc(i));
+            stringBuilder.append(getPayLoadUrl(i)).append(" ").append(getDefaultDesc(i));
         }
         return Utils.hashKeyFormUrl(stringBuilder.toString());
-    }
-
-    public String getPayLoadUrl(int index) {
-        return getImageDatas() == null ? getUrls()[index] : getImageDatas()[index].getUrl();
     }
 
     public void load() {

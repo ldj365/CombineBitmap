@@ -26,6 +26,10 @@ public class Utils {
 
 
     public static String hashKeyFormUrl(String url) {
+        if(url==null){
+            return "";
+        }
+
         String cacheKey;
         try {
             final MessageDigest mDigest = MessageDigest.getInstance("MD5");
